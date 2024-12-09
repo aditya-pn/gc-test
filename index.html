@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Guillotine Cut Test 01</title>
+
+	<script src="js/lib/twojs/build/two.min.js"></script>
+	<script src="js/uuid.js"></script>
+	<script src="js/tree.js"></script>
+
+	<style>
+		#sheet {
+			background-color: #ddd;
+			margin: 100px;
+			border: 2px solid #aaa;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			position: relative;
+		}
+
+		#input-form {
+			margin: 20px;
+			font-family: Arial, sans-serif;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 5px;
+			font-weight: bold;
+		}
+
+		input {
+			margin-bottom: 15px;
+			padding: 8px;
+			width: 100%;
+			max-width: 300px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+
+		button {
+			padding: 10px 20px;
+			background-color: #007BFF;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		button:hover {
+			background-color: #0056b3;
+		}
+	</style>
+</head>
+
+<body>
+	<form id="input-form">
+		<label for="mediaWidth">Media Width:</label>
+		<input type="number" id="mediaWidth" placeholder="Enter media width" />
+
+		<label for="mediaHeight">Media Height:</label>
+		<input type="number" id="mediaHeight" placeholder="Enter media height" />
+
+		<label for="documentWidth">Document Width:</label>
+		<input type="number" id="documentWidth" placeholder="Enter document width" />
+
+		<label for="documentHeight">Document Height:</label>
+		<input type="number" id="documentHeight" placeholder="Enter document height" />
+
+		<button type="button" onclick="applySettings()">Apply</button>
+	</form>
+
+	<div id="sheet">Sheet Preview</div>
+
+	<script>
+		let two;
+		let tree;
+
+		function applySettings() {
+			// Get the input values
+			const mediaWidth = parseInt(document.getElementById('mediaWidth').value);
+			const mediaHeight = parseInt(document.getElementById('mediaHeight').value);
+			const documentWidth = parseInt(document.getElementById('documentWidth').value);
+			const documentHeight = parseInt(document.getElementById('documentHeight').value);
+
+			// Validate inputs
+			if (!mediaWidth || !mediaHeight || !documentWidth || !documentHeight) {
+				alert('Please fill in all fields.');
+				return;
+			}
+
+			// Update the sheet dimensions
+			const sheet = document.getElementById('sheet');
+			while (sheet.hasChildNodes()) {
+				sheet.removeChild(sheet.firstChild);
+			}
+			sheet.style.width = `${mediaWidth}px`;
+			sheet.style.height = `${mediaHeight}px`;
+
+			// Clear the sheet content and initialize Two.js
+			sheet.innerHTML = '';
+			two = new Two({
+				width: mediaWidth,
+				height: mediaHeight,
+				autostart: true,
+			}).appendTo(sheet);
+
+			// Create a new tree for packing documents
+			tree = new Node(mediaWidth, mediaHeight);
+
+			// Calculate how many documents can fit inside the media
+			var piece = { w: documentWidth, h: documentHeight }
+
+			// Attempt to place each piece
+			let success_push = Node.try_push(piece);
+			while (success_push) {
+				success_push = Node.try_push(piece);
+				if (!success_push) break;
+			}
+
+			// Draw the tree structure
+			tree.draw({ x: tree.w / 2, y: tree.h / 2 });
+		}
+	</script>
+</body>
+
+</html>
